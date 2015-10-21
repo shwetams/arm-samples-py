@@ -1,0 +1,31 @@
+﻿{% extends "base.html" %}
+{% block content %}
+      
+<tr>
+    <td>
+        <p class="text-justify"> This Django based website enables you to try out the new Azure Resource Manager. Please make sure you have gone through the Settings tab to set basic authentication values.</p>
+        <p class="text-justify"> Through this sample one can create a Virtual machine, storage account in a Virtual network within a resource group. You can either create them individually, or create a complete deployment.</p>
+        <p class="text-justify"> The next version will have more advanced options like building a complete Resource Manager template</p>
+    </td>
+</tr>
+           <tr>
+            <td>
+                <h2><a href={% url "deployment_option" %}>Deployment option</a></h2>
+                <small>This option will take you through a complete deployment, creating a resource group, adding a storage account and a virtual machine on a virtual network</small>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h2>Seperate Option (coming soon)</h2>
+                <small>This option you can indvidually create resources</small>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h2>Template option (coming soon)</h2>
+                <small>With this option you can generate your own custom ARM template</small>
+            </td>
+        </tr>
+{% endblock content %}
+
+

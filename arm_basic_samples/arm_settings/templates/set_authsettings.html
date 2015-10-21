@@ -1,0 +1,113 @@
+﻿<!--#!/usr/bin/env python
+
+#
+#
+# Copyright (c) Microsoft Corporation
+#
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+-->
+{% extends "base.html" %}
+
+{% block jscode %}
+
+<script type="text/javascript">
+    $(function () {
+        $(".dropdown-menu li a").click(function () {
+
+            var selText = $(this).text();
+            var selID = $(this).attr("data-value")
+            $(this).parents('.btn-group').find('.dropdown-toggle').html(selText + ' <span class="caret"></span>')
+            document.getElementById("authtypeid").value = selID
+            getselID = document.getElementById("authtypeid").value
+            //alert("I am here" + getselID)
+            //$("#aid").html(selID)
+        });
+       
+        
+    });
+    
+    
+   
+   
+</script>
+{% endblock jscode %}
+{% block content %}
+    <tr><td><h3>Deployment option</h3></td></tr>
+    <tr><td>
+            <form class="form-horizontal" method="post" action="" role="form">
+                {% csrf_token %}
+                <div class="input-group">
+                    <a href="{% url "automatic_settings" %}"><h3>Login to detect automatically</h3></a>
+                </div>
+                
+                <div class="input-group">
+                    <span class="input-group-addon"  style="width:300px;text-align:left">Auth type</span>
+
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#" style="width:200px;text-align:justify" id="location">Select authorization type<span class="caret"></span></a>
+                        <ul class="dropdown-menu" style="width:200px;text-align:justify">
+                            {% for auth in authorization_list %}
+                            <li><a href=" #" data-value="{{ auth.id }}">{{ auth.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" id="inp_clientid" style="width:300px;text-align:left">Client ID</span>
+                    <input type="text" class="form-control" name="inp_clientid_txt" id="inp_clientid_txt" aria-describedby="inp_clientid" placeholder="Client ID" style="width:200px;text-align:left">
+
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" id="inp_tenantid" style="width:300px;text-align:left">Tenant ID</span>
+                    <input type="text" class="form-control" id="inp_tenantid_txt" name="inp_tenantid_txt" aria-describedby="inp_tenantid" placeholder="Tenant ID" style="width:200px;text-align:left">
+                </div>
+                <div class="input-group">
+
+                    <span class="input-group-addon" id="inp_clientsecret" style="width:300px;text-align:left">Client Secret</span>
+                    <input type="text" class="form-control" id="inp_clientsecret_txt" name="inp_clientsecret_txt" aria-describedby="inp_clientsecret" placeholder="Client secret" style="width:200px;text-align:left">
+                </div>
+                <div class="input-group">
+
+                    <span class="input-group-addon" id="inp_redirecturi" style="width:300px;text-align:left">Redirect URI</span>
+                    <input type="text" class="form-control" id="inp_redirecturi_txt" name="inp_redirecturi_txt" aria-describedby="inp_redirecturi" placeholder="Redirect URI" style="width:200px;text-align:left">
+                </div>
+                <div class="input-group">
+
+                    <span class="input-group-addon" id="inp_subsid" style="width:300px;text-align:left">Subscription ID</span>
+                    <input type="text" class="form-control" id="inp_subsid_txt" name="inp_subsid_txt" aria-describedby="inp_subsid" placeholder="Subscription ID" style="width:200px;text-align:left">
+                </div>
+                <div id="hiddenfields">
+                    {% if user.is_authenticated %}
+                    <input type="hidden" id="user_id" name="user_id" value="{{ user.id }}" />
+                    {% endif %}
+                    <input type="hidden" id="authtypeid" name="authtypeid" value="A" />
+                </div>
+                <div class="input-group">
+                    <input type="submit" class="btn" value="Save settings" id="btn_savesetting"/>
+                </div>
+            </form>
+
+        </td></tr>
+{% endblock content %}

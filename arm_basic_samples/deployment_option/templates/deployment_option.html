@@ -1,0 +1,558 @@
+﻿<!--#!/usr/bin/env python
+
+#
+#
+# Copyright (c) Microsoft Corporation
+#
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+-->
+{% extends "base.html" %}
+
+{% block jscode %}
+
+<script type="text/javascript">
+    
+    $(function () {
+        //, 
+        $('#usersubscriptionlist').on('click', '.dropdown-menu li a', function () {
+            var selVal = $(this).attr('data-value')
+            //alert("I am here" + selVal)
+            var setCont = $(this).attr('data-f')
+            var selText = $(this).text();
+            $(this).parents('.btn-group').find('.dropdown-toggle').html(selText + ' <span class="caret"></span>');
+            $("#" + setCont).val(selVal)
+            
+        });
+        $("#vmimagesdiv").on('click','.dropdown-menu li a', function () {
+            var selVal = $(this).attr('data-value')
+            //alert("I am here" + selVal)
+            var setCont = $(this).attr('data-f')
+            var selText = $(this).text();
+            $(this).parents('.btn-group').find('.dropdown-toggle').html(selText + ' <span class="caret"></span>');
+            $("#" + setCont).val(selVal)
+            
+            if (setCont == "vmimgpub") {
+                region = $("#locationid").val()
+                pub_name = $("#vmimgpub").val()
+                $("#pub_spinner").show()
+                $.get('../getvmimagelistbyoffers/', { 'region': region, 'publisher': pub_name }, function (data) {
+                    data_j = JSON.parse(data)
+                    var list_str = '<div class="btn-group"><a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#" style="width:200px;text-align:justify" id="vmimgo">Select offer<span class="caret"></span></a>'
+                    list_str += '<ul class="dropdown-menu" style="width:200px;text-align:justify">'
+                    for (var p = 0; p < data_j.length; p++) {
+                        list_str += '<li><a href="#" data-f="vmimgoffer" data-value=' + data_j[p].name + '>' + data_j[p].name + '</a></li>'
+                    }
+                    list_str += '</ul></div>'
+                    $("#vmofferlist").html(list_str)
+                    $("#pub_spinner").hide()
+                });
+
+                // get offers
+            }
+            if (setCont == "vmimgoffer") {
+                region = $("#locationid").val()
+                pub_name = $("#vmimgpub").val()
+                offer = $("#vmimgoffer").val()
+                $("#offer_spinner").show()
+                $.get('../getvmimagelistbyskus/', { 'region': region, 'publisher': pub_name, 'offer': offer }, function (data) {
+                    data_j = JSON.parse(data)
+                    var list_str = '<div class="btn-group"><a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#" style="width:200px;text-align:justify" id="vmimgsku">Select SKU<span class="caret"></span></a>'
+                    list_str += '<ul class="dropdown-menu" style="width:200px;text-align:justify">'
+                    for (var p = 0; p < data_j.length; p++) {
+                        list_str += '<li><a href=" #" data-f="vmimgsku" data-value=' + data_j[p].name + '>' + data_j[p].name + '</a></li>'
+                    }
+                    list_str += '</ul></div>'
+                    $("#vmskuslist").html(list_str)
+                    $("#offer_spinner").hide()
+
+                });
+                // get skus
+            }
+            if (setCont == "vmimgsku") {
+                pub_name = $("#vmimgpub").val()
+                offer = $("#vmimgoffer").val()
+                sku = $("#vmimgsku").val()
+                region = $("#locationid").val()
+                $("#skus_spinner").show()
+                $.get('../getvmimagelistbyversions/', { 'region': region, 'publisher': pub_name, 'offer': offer, 'skus': sku }, function (data) {
+                    data_j = JSON.parse(data)
+                    var list_str = '<div class="btn-group"><a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#" style="width:200px;text-align:justify" id="vmimgver">Select version<span class="caret"></span></a>'
+                    list_str += '<ul class="dropdown-menu" style="width:200px;text-align:justify">'
+                    if (data_j.length <= 0)
+                    {
+                        list_str += '<li><a href=" #" data-f="vmimgversion" data-value="latest">' + "latest" + '</a></li>'
+                    }
+                    else
+                    {
+                        list_str += '<li><a href=" #" data-f="vmimgversion" data-value="latest">' + "latest" + '</a></li>'
+                        for (var p = 0; p < data_j.length; p++) {
+                            list_str += '<li><a href=" #" data-f="vmimgversion" data-value=' + data_j[p].name + '>' + data_j[p].name + '</a></li>'
+                        }
+                    }
+                    
+                    list_str += '</ul></div>'
+                    $("#vmversionslist").html(list_str)
+                    $("#skus_spinner").hide()
+                });
+                // get versions
+            }
+            if (setCont == "vmimgversion") {
+                pub_name = $("#vmimgpub").val()
+                offer = $("#vmimgoffer").val()
+                sku = $("#vmimgsku").val()
+                version = $("#vmimgversion").val()
+                region = $("#locationid").val()
+                $("#inp_image_id").val("Publisher:" + pub_name + ";Offer:" + offer + ";SKU:" + sku + ";Version: " + version)
+            }
+        });
+        $(".dropdown-menu li a").on('click',function () {
+            //alert("I am getting called")
+            var selVal = $(this).attr('data-value')
+            
+            var setCont = $(this).attr('data-f')
+            
+            var selText = $(this).text();
+            $(this).parents('.btn-group').find('.dropdown-toggle').html(selText + ' <span class="caret"></span>');
+            $("#"+setCont).val(selVal)                
+           
+              
+        });
+        
+    });
+    $(function () {
+        $("#vmimgsearch").change(function () {
+            var search_txt = $("#vmimgsearch").val()
+
+
+
+        })
+    });
+    
+    
+    function checkPass()
+    {
+        var goodColor = "#66cc66";
+        var badColor = "#ff6666";
+        pwd1 = document.getElementById("inp_password_txt").value
+        pwd2 = document.getElementById("inp_password_rep_txt").value
+        message = document.getElementById("confirmMessage")
+        if (pwd1 == pwd2)
+        {
+            $('#confirmMessage').addClass('alert alert-success');
+            //message.className = "alert alert-success"
+            $('#confirmMessage').html("Passwords match")
+            
+        }
+        else
+        {
+            $('#confirmMessage').addClass('alert alert-danger');
+
+            //message.className = "alert alert-success"
+            $('#confirmMessage').html("Passwords do not match")
+            //message.className = "alert alert-error"
+            //message.innerHTML = "Passwords do not match!"
+        }
+        
+
+    }
+
+
+    function autogenerate_names()
+    {
+        // Add checks for length names
+        //var deploymentName = $("#inp_deploymentname_txt").html
+        var deploymentName = document.getElementById("inp_deploymentname_txt").value
+        document.getElementById("inp_resgrpname_txt").value = deploymentName + "_rg"
+        document.getElementById("inp_storaccname_txt").value = deploymentName + "sa"
+        document.getElementById("inp_vmname_txt").value = deploymentName + "vm"
+        document.getElementById("inp_vnetname_txt").value = deploymentName + "_vnet"
+        
+    }
+    function assignvmimageid(img_id_cb)
+    {
+        if (img_id_cb.checked)
+        {
+            document.getElementById("inp_image_id").value = img_id_cb.value
+        }
+        
+        
+
+    }
+    var deploymentDetails = {}
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function get_access_code(code) {
+        
+        code_str = code["code"]
+        var code_arr = ""
+        console.log("code:" + code_str)
+        code_arr = code_str.toString().split('&')
+        code_val = code_arr[0].replace("code=", "")
+        deploymentDetails["auth_code"] = code_val
+
+        $.ajax({
+            url: '../deploy/',
+            type: 'post',
+            headers: { "X-CSRFToken": getCookie('csrftoken') },
+            data:deploymentDetails,
+            dataType:'json',
+            success: function (data) {
+                $("#dep_spinner").hide()
+                $("#deploy_results").html(JSON.stringify(data))
+            }
+            
+        })
+        
+    }
+
+    function deployComponents()
+    {
+        $("#dep_spinner").show()
+        var VMDetails = {}
+        var storageAccountDetails = {}
+        deploymentDetails["resourceGroupName"] = document.getElementById("inp_resgrpname_txt").value.trim()
+        deploymentDetails["location"] = $("#locationid").val()
+        deploymentDetails["vmName"] = document.getElementById("inp_vmname_txt").value.trim()
+        deploymentDetails["vmUserName"] = document.getElementById("inp_vmusername_txt").value.trim()
+        deploymentDetails["vmPassword"] = document.getElementById("inp_password_txt").value.trim()
+        deploymentDetails["vmPricingTier"] = $("#pricingtier").val()
+        deploymentDetails["vmImageID"] = document.getElementById("inp_image_id").value.trim()
+        //deploymentDetails["vmDetails"] = VMDetails
+        deploymentDetails["vnetName"] = document.getElementById("inp_vnetname_txt").value.trim()
+        deploymentDetails["storageAccountName"] = document.getElementById("inp_storaccname_txt").value.trim()
+        deploymentDetails["storageAccountType"] = $("#acctype").val()        
+        deploymentDetails["user_id"] = document.getElementById("user_id").value.trim()
+        deploymentDetails["vmPublisher"] = $("#vmimgpub").val()
+        deploymentDetails["vmOffer"] = $("#vmimgoffer").val()
+        deploymentDetails["vmSKU"] = $("#vmimgsku").val()
+        deploymentDetails["vmVersion"]=$("#vmimgversion").val()
+        deploymentDetails["subscriptionID"] = $("#subscriptionid").val()
+        //deploymentDetails["vmPublisher"]
+        $.ajax({
+            url: '../authdetails/',
+            type: 'POST',
+            data: deploymentDetails,
+            dataType: 'json',
+            headers: { "X-CSRFToken": getCookie('csrftoken') },
+            error: function(e){console.log(e.message)},
+            success: function (data) {
+                deploymentDetails["auth_type"] = data["auth_type"]
+                //console.log(data["auth_type"])
+                if (data["auth_type"] == "A") {
+                    $.ajax({
+                        url: '../deploy/',
+                        type: 'post',
+                        headers: { "X-CSRFToken": getCookie('csrftoken') },
+                        data: deploymentDetails,
+                        dataType: 'json',
+                        success: function (data) {
+                            $("#deploy_results").html(JSON.stringify(data))
+                            $("#dep_spinner").hide()
+                        }
+
+                    })
+                    // directly call the ../deploy url and pass auth type as A, the application will then get the token itself
+                }
+                else {
+                    
+                    var url = data["auth_code_url"]
+                    popup = window.open(url, "Login", width=300,height=200);
+                    popup.focus();
+                    //var winResCode = open(url, "_blank")
+                    //$("#auth_code_link").html(winResCode)
+                }
+
+            }
+        })
+        
+        
+        
+
+    }
+    function fetchsubscriptions()
+    {
+        $("#subs_spinner").show()
+        var user_id = $("#user_id").val()
+        $.get('../getsubscriptionlist/', { 'user_id': user_id }, function (data) {
+            data_j = JSON.parse(data)
+            data_j = JSON.parse(data_j)
+            //console.log(data_j)
+            var list_str = '<div class="btn-group"><a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#" style="width:200px;text-align:justify" id="subscriptionid_1">Select subscription<span class="caret"></span></a>'
+            list_str += '<ul class="dropdown-menu" style="width:200px;text-align:justify">'
+            console.log(data_j)
+            console.log(data_j.length)
+            for (var s = 0; s < data_j.length; s++)
+            {
+                list_str += '<li><a href=" #" data-f="subscriptionid" data-value=' + data_j[s].subscriptionid + '>' + data_j[s].subscriptionid + '</a></li>'
+            }
+            list_str += '</ul></div>'
+            
+
+            $("#usersubscriptionlist").html(list_str)  
+            $("#subs_spinner").hide()
+        });
+
+    }
+    function showhidevmimagelist()
+    {
+        var strmsg = document.getElementById("btn_vmimagelist").value
+        var imglst_btn = document.getElementById("btn_vmimagelist")
+        
+
+        if (strmsg == "Show image list") {
+            $("#pub_spinner").show()
+            imglst_btn.value = "Reset"
+            //region = "westus"
+            region = $("#locationid").val()
+            $.get('../getvmimagelistbypublishers/', { 'region': region }, function (data) {
+                
+                //console.log(data)
+                data_j = JSON.parse(data)
+                //console.log(data_j)
+                var list_str = '<div class="btn-group"><a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#" style="width:200px;text-align:justify" id="vmimgp">Select publisher<span class="caret"></span></a>'
+                list_str += '<ul class="dropdown-menu" style="width:200px;text-align:justify">'
+                for (var p=0;p<data_j.length;p++)
+                {
+                    
+                    list_str += '<li><a href=" #" data-f="vmimgpub" data-value=' + data_j[p].name + '>' + data_j[p].name + '</a></li>'
+                }
+                list_str += '</ul></div>'
+                
+                $("#vmpublisherlist").html(list_str)
+                $("#pub_spinner").hide()
+            });
+            //$.getJSON('../getvmimagelist/', {'region':region} , function (data) {
+            //    len = data.length
+            //    var table_str = '<div data-role="main" class="ui-content"><table><tr><td><input id="imgFilter" data-type="search" placeholder="Search image"></td></tr><tr><td><table data-role="table" data-mode="columntoggle" class="ui-responsive ui-shadow" id="vmimagelist" data-filter="true" data-input="#imgFilter">'
+            //    table_str += '<thead class="filters">'
+            //    table_str += '<tr><th data-priority="5">Select</th><th data-priority="1">Publisher</th><th data-priority="3">Offer</th><th data-priority="2">SKU</th><th data-priority="4">Version</th></tr>'
+            //    table_str += '</thead>'
+            //    for(var i=0;i<len;i++)
+            //    {
+            //        table_str += "<tr><td><input type='checkbox' name='selectimg' onclick='assignvmimageid(this)' value='" + "{ publisher:"+ data[i].publisher +", offer:"+ data[i].offer +", skus:"+ data[i].skus +", version:"+ data[i].version + "}" + "'</td><td>" + data[i].publisher + "</td><td>" + data[i].offer + "</td><td>" + data[i].skus + "<td><td>" + data[i].version + "</td></tr>"
+                    
+            //    }
+            //    table_str += '</table></td></tr></table></div>'
+            //    $("#vmimagelist").html(table_str)
+            //    });
+        }
+        else
+        {
+            
+            imglst_btn.value = "Show image list"
+            //$("#btn_vmimagelist").html("Show image list")
+            //$("#vmimagelist").html("")
+        }
+        
+        
+    }
+
+    //$("#location_lst li a").click(function () { alert("his is .click handler") });
+    
+    //$("#lst_storageaccounttype li a").click(function () {
+    //    var lst = $(this).html()
+    //    alert(lst)
+    //    $("#storacc_type").html(lst)
+   // })
+   
+    
+
+    // $('#location_lst li').on('click', function () {
+   //     $('#location').val($(this).text());
+   // });
+
+</script>
+{% endblock jscode %}
+{% block content %}
+    <tr><td><h3>Deployment option</h3></td></tr>
+    <tr><td>
+            <form class="form-horizontal" method="post" action="" role="form">
+                {% csrf_token %}
+                {% if user.is_authenticated %}
+                <input type="hidden" id="user_id" name="user_id" value="{{ user.id }}" />
+                {% endif %}
+                <div class="input-group">
+                    <span class="input-group-addon" id="inp_deploymentname" style="width:300px;text-align:left">Please enter deployment name</span>                    
+                    <input type="text" class="form-control" id="inp_deploymentname_txt" aria-describedby="inp_deploymentname" placeholder="deployment name" onchange="autogenerate_names()" style="width:200px;text-align:left">                    
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon"  style="width:300px;text-align:left">Location</span>
+                    
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#" style="width:200px;text-align:justify" id="location">Select location<span class="caret"></span></a>
+                        <ul class="dropdown-menu" style="width:200px;text-align:justify">
+                            {% for location in location_list %}
+                            <li><a href=" #" data-f="locationid" data-value="{{ location.id }}">{{ location.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>                  
+                   
+                    
+                </div>               
+                <div class="input-group">
+                    <span class="input-group-addon" id="inp_resgrpname" style="width:300px;text-align:left">Resource group</span>
+                    <input type="text" class="form-control" id="inp_resgrpname_txt" aria-describedby="inp_resgrpname" placeholder="resource group name" style="width:200px;text-align:left">
+                    
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" id="inp_storaccname" style="width:300px;text-align:left">Storage account name</span>
+                    <input type="text" class="form-control" id="inp_storaccname_txt" aria-describedby="inp_storaccname" placeholder="storage account name" style="width:200px;text-align:left">
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" id="inp_storacctype" style="width:300px;text-align:left">Storage account</span>
+                    
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle btn-select2" data-toggle="dropdown" href="#" style="width:200px;text-align:justify" id="accounttype">Select storage account<span class="caret"></span></a>
+                        <ul class="dropdown-menu" style="width:200px;text-align:justify">
+                            {% for acc_type in storage_acc_type_list %}
+                            <li><a href="#" data-f="acctype"  data-value="{{ acc_type }}">{{ acc_type }}</a> </li>
+                            {% endfor %}
+                        </ul>
+                    </div>          
+                  
+                    
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" id="inp_vnetname" style="width:300px;text-align:left">Storage account name</span>
+                    <input type="text" class="form-control" id="inp_vnetname_txt" aria-describedby="inp_vnetname" placeholder="VNet name" style="width:200px;text-align:left">
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" style=" width:500px;text-align:left">Virtual machine details:</span>                    
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" id="inp_vmname" style="width:300px;text-align:left">VM Name</span>
+                    <input type="text" class="form-control" id="inp_vmname_txt" aria-describedby="inp_vmname" placeholder="VM name" style="width:200px;text-align:left" />
+                 </div>
+                <div class="input-group">
+                    <span class="input-group-addon" id="inp_vmusername" style="width:300px;text-align:left">VM user name</span>
+                    <input type="text" class="form-control" id="inp_vmusername_txt" aria-describedby="inp_vmusername" placeholder="VM user name" style="width:200px;text-align:left" />
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" id="inp_pwd_key" style="width:300px;text-align:left">VM password</span>
+                    <input type="password" class="form-control" id="inp_password_txt" aria-describedby="inp_pwd_key" placeholder="enter password" style="width:200px;text-align:left" />
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" id="inp_pwd_key_repeat" style="width:300px;text-align:left">VM password</span>
+                    <input type="password" class="form-control" id="inp_password_rep_txt" aria-describedby="inp_pwd_key_repeat" placeholder="re-enter password" style="width:200px;text-align:left" onkeyup="checkPass(); return false;" />
+                    <span id="confirmMessage" style="font:8px;width:300px"></span>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" style="width:300px;text-align:left">Pricing tier</span>
+
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle btn-select2" data-toggle="dropdown" href="#" style="width:200px;text-align:justify" id="pricingtier">Select pricing tier<span class="caret"></span></a>
+                        <ul class="dropdown-menu" style="width:200px;text-align:justify">
+                            {% for pricing_tier in pricing_tier_list %}
+                            <li><a href="#" data-f="pricingtier"  data-value="{{ pricing_tier.Instance }}">{{ pricing_tier.Instance }}</a> </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" id="image_id" style="width:300px;text-align:left">Select VM Image</span>
+                    {% load staticfiles %}
+                    <div class="input-group" id="vmimagesdiv">
+                        
+                        <input id="inp_image_id" class="form-control" aria-describedby="image_id" placeholder="VM image id" style="width:200px;text-align:left">
+                        <input type="button" class="btn" value="Show image list" id="btn_vmimagelist" onclick="showhidevmimagelist()" />
+                        <div id="vmpublisherlist">                            
+                            
+                        </div>
+                        <div id="pub_spinner" style="display:none"> 
+                            <img id="pub_spinner_img" src={% static "assets/images/ajaxloader.gif" %} alt="loading"/>
+                        </div>
+                        <div class="input-group">
+                            <div id="vmofferlist"></div>
+                            <div id="offer_spinner" style="display:none">
+                                <img id="pub_offer_img" src={% static "assets/images/ajaxloader.gif" %} alt="loading" />
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <div id="vmskuslist"></div>
+                            <div id="skus_spinner" style="display:none">
+                                <img id="pub_skus_img" src={% static "assets/images/ajaxloader.gif" %} alt="loading" />
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <div id="vmversionslist"></div>
+                            <div id="ver_spinner" style="display:none">
+                                <img id="pub_version_img" src={% static "assets/images/ajaxloader.gif" %} alt="loading" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="input-group">
+                    <input type="button" class="btn" value="Fetch saved subscription" id="btn_subs" onclick="fetchsubscriptions()" />
+                </div>
+                <div class="input-group">                    
+                    <div id="usersubscriptionlist">
+
+                    </div>
+                    <div id="subs_spinner" style="display:none">
+                        <img id="subs_img" src={% static "assets/images/ajaxloader.gif" %} alt="loading"/>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="button" class="btn" value="Deploy all components" id="btn_deploy" onclick="deployComponents()"/>
+                    
+                </div>
+                <div class="input-group">
+                    <div id="auth_code_link" class="btn btn-default-xs"></div>
+                    <div id="dep_spinner" style="display:none">
+                        <img id="dep_spinner_img" src={% static "assets/images/ajaxloader.gif" %} alt="loading" />
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div id="deploy_results">
+                        
+                    </div>
+
+                </div>
+                <div id="hiddenfields">
+                    <input type="hidden" id="locationid" name="locationid" />
+                    <input type="hidden" id="acctype" name="acctype" />
+                    <input type="hidden" id="pricingtier" name="pricingtier" />
+                    <input type="hidden" id="vmimgpub" name="vmimgpub" />
+                    <input type="hidden" id="vmimgoffer" name="vmimgoffer" />
+                    <input type="hidden" id="vmimgsku" name="vmimgsku" />
+                    <input type="hidden" id="vmimgversion" name="vmimgversion" />
+                    <input type="hidden" id="subscriptionid" name="subscriptionid" />
+                </div>
+            </form>
+
+        </td></tr>
+{% endblock content %}

@@ -1,0 +1,150 @@
+﻿<!--#!/usr/bin/env python
+
+#
+#
+# Copyright (c) Microsoft Corporation
+#
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+-->
+{% extends "base.html" %}
+{% block jscode %}
+
+<script type="text/javascript">
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function assign_role()
+    {
+        $("#dep_spinner").show()
+        data = {"tenant_id":$("#tenant_id").val(),"subs_list":$("#subs_list").val(),"user_id":$("#user_id").val(),"token_user":$("#token_user").val() }
+        $.ajax({
+            url: '../assignroles/',
+            type: 'POST',
+            data:data,            
+            headers: { "X-CSRFToken": getCookie('csrftoken') },
+            success: function (data) {                
+                $("#dep_spinner").hide()
+                $("#assign_results").html(data)
+                
+            }
+        })
+    }
+    function update_subslist(chkbox)
+    {
+        subs_list_val = document.getElementById("subs_list").value
+        subs_list = []
+        subs_list = JSON.parse(subs_list_val)
+
+        if (chkbox.checked) {
+            sub_val = chkbox.value            
+            subs_list.push(sub_val)
+        }
+        else
+        {
+            rem_index = -1
+            for (i=0;i<subs_list.length;i++)
+            {
+                if (subs_list[i] == subs_list_val)
+                {
+                    rem_index = i
+                }
+            }
+            subs_list.splice(rem_index,1)
+        }
+        $("#subs_list").val(JSON.stringify(subs_list))
+    }
+</script>
+{% endblock jscode %}
+{% block content %}
+
+<tr><td><h3>Deployment option</h3></td></tr>
+<tr>
+    <td>
+        {% csrf_token %}
+        <form class="form-horizontal" method="post" action="" role="form">
+
+            <table>
+                {% for subscription in subscriptions %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="{{ subscription.id }}" value="{{ subscription.id }}" onclick="update_subslist(this)"/>
+                    </td>
+                    <td>
+                        id: {{ subscription.id }}
+                    </td>
+                    <td>
+                        name : {{ subscription.name }}
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    {% load staticfiles %}
+                    <td colspan="3">
+                        <table>
+                            <tr>
+                                <td>
+                                    <input type="button" name="btnassign" id="btnassign" value="Connect selected subscriptions" class="btn" onclick="assign_role()" title="Assign to selected subscriptions">
+                                </td>
+                                <td>
+                                    <div id="dep_spinner" style="display:none">
+                                        <img id="dep_spinner_img" src={% static "assets/images/ajaxloader.gif" %} alt="loading" />
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <div class="input-group">
+                            <div id="assign_results"></div>
+                        </div>
+                    </td>
+
+                </tr>
+            </table>
+            <div id="hiddenfields">
+                {% if user.is_authenticated %}
+                <input type="hidden" id="user_id" name="user_id" value="{{ user.id }}" />
+                {% endif %}
+                <input type="hidden" id="tenant_id" name="tenant_id" value="{{ tenant_id }}" />
+                <input type="hidden" id="token_user" name="token_user" value="{{ token_user }}">
+                <input type="hidden" id="subs_list" name="subs_list" value="[]"/>
+            </div>
+            </form>
+
+</td></tr>
+{% endblock content %}

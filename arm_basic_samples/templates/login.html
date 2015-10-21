@@ -1,0 +1,17 @@
+﻿<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Please login</title>
+</head>
+<body>
+    {% if form.errors %}
+        <p>Your username and password didn't match. Please re-enter your credentials</p>
+    {% endif %}
+    <form role="form" method="post" action="">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Login"/>
+        <input type="hidden" name="ntext" value="{{ next }}" />
+    </form>
+</body>
+</html>
